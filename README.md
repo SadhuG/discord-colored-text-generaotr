@@ -21,7 +21,8 @@ Live Deployment: [Discord Text Formatter](https://discord-colored-text-generaotr
 3. Click on any style button to apply formatting:
    - Choose text colors
    - Add background colors
-   - Apply bold or underline
+   - Apply bold or underline (For text styles first
+     <u>underline</u> then <strong>bold</strong>)
    - Use the Reset button to remove formatting
 4. Mix different styles by selecting text and applying multiple formats
 5. Click "Copy" to copy the formatted text

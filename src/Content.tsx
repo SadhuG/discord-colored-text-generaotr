@@ -165,51 +165,44 @@ const Content: React.FC<object> = () => {
     }
   };
 
-  function handleClick(event: React.MouseEvent<HTMLButtonElement>) {
-    // Get the clicked button
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     const btn = event.currentTarget;
     const ansiValue = btn.dataset.ansi;
 
-    // Early return if no ansi value
-    if (!ansiValue) {
-      return;
-    }
+    if (!ansiValue) return;
 
-    // Get the selection from window instead of hook
     const selection = window.getSelection();
-    if (!selection) {
-      return;
-    }
+    if (!selection) return;
 
-    // Get selected text
     const text = selection.toString();
-    if (!text) {
+    if (!text) return;
+
+    if (Number(ansiValue) === 0) {
+      const element = selection.anchorNode;
+      let current = element?.parentElement;
+      let lastSpan = null;
+      while (current && current.tagName.toLowerCase() === "span") {
+        lastSpan = current; // store the last span encountered
+        current = current.parentElement;
+      }
+      if (lastSpan) {
+        lastSpan.replaceWith(text);
+      }
       return;
     }
 
-    try {
-      // Create and configure span element
-      const span = document.createElement("span");
-      span.textContent = text;
-      span.classList.add(`ansi-${ansiValue}`);
+    const span = document.createElement("span");
+    span.textContent = text;
+    span.classList.add(`ansi-${ansiValue}`);
 
-      // Replace selected content with new span
-      const range = selection.getRangeAt(0);
-      range.deleteContents();
-      range.insertNode(span);
+    const range = selection.getRangeAt(0);
+    range.deleteContents();
+    range.insertNode(span);
 
-      // Update selection to new span
-      range.selectNodeContents(span);
-      selection.removeAllRanges();
-      selection.addRange(range);
-
-      // Force input event to trigger sanitization
-      const inputEvent = new Event("input", { bubbles: true });
-      textAreaRef.current?.dispatchEvent(inputEvent);
-    } catch (error) {
-      console.error("Failed to apply formatting:", error);
-    }
-  }
+    range.selectNodeContents(span);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  };
 
   function nodesToANSI(
     nodes: NodeListOf<ChildNode> | HTMLCollection,
@@ -380,7 +373,10 @@ const Content: React.FC<object> = () => {
         <ul className="list-inside list-disc space-y-1">
           <li>Type or paste your text in the editor below</li>
           <li>Select the text you want to format</li>
-          <li>Mix different styles, colors, and backgrounds</li>
+          <li>
+            Mix different styles, colors, and backgrounds (For text styles first
+            <u>underline</u> then <strong>bold</strong>)
+          </li>
           <li>Click on any style button to apply formatting</li>
           <li>Click "Copy" to use in Discord</li>
         </ul>
