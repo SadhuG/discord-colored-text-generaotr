@@ -1,14 +1,177 @@
-import { Button, Tooltip } from "@mantine/core";
-import { useClipboard, useTextSelection } from "@mantine/hooks";
-import { useRef } from "react";
+import { Tooltip } from "@mantine/core";
+import { KeyboardEvent, useCallback, useRef, useState } from "react";
 
-const Content = () => {
-  // gets us the selected text
-  const selection = useTextSelection();
+interface ANSIState {
+  fg: number;
+  bg: number;
+  st: number;
+}
 
-  const clipboard = useClipboard({ timeout: 500 });
 
+
+type ButtonState = typeof BUTTON_STATES[keyof typeof BUTTON_STATES];
+
+const BUTTON_STATES = {
+  DEFAULT: "Copy text as Discord formatted",
+  COPIED: "Copied!",
+  ERROR: "Failed to copy"
+} as const;
+
+const Content: React.FC<object> = () => {
   const textAreaRef = useRef<HTMLDivElement>(null);
+  const copyButtonRef = useRef<HTMLButtonElement>(null);
+  const [copyButtonText, setCopyButtonText] = useState<ButtonState>(BUTTON_STATES.DEFAULT);
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleCopy = useCallback(() => {
+    const copyBtn = copyButtonRef.current;
+    // Early return if refs are null
+    if (!textAreaRef.current || !copyBtn) return;
+
+    const toCopy =
+      "```ansi\n" +
+      nodesToANSI(textAreaRef.current.childNodes, [{ fg: 2, bg: 2, st: 2 }]) +
+      "\n```";
+
+    // Copy to clipboard
+    navigator.clipboard
+      .writeText(toCopy)
+      .then(() => {
+        setCopyButtonText(BUTTON_STATES.COPIED);
+        setIsCopied(true);
+        setTimeout(() => {
+          copyBtn.innerText = BUTTON_STATES.DEFAULT;
+          setIsCopied(false);
+        }, 2000);
+      })
+      .catch((error) => {
+        console.error("Copy failed:", error);
+        alert(BUTTON_STATES.ERROR);
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array since we're only using refs
+
+  function handleInput() {
+    if (textAreaRef.current) {
+      const base = textAreaRef.current.innerHTML.replace(
+        /<(\/?(br|span|span class="ansi-[0-9]*"))>/g,
+        "[$1]",
+      );
+      if (base.includes("<") || base.includes(">")) {
+        textAreaRef.current.innerHTML = base
+          .replace(/<.*?>/g, "")
+          .replace(/[<>]/g, "")
+          .replace(/\[(\/?(br|span|span class="ansi-[0-9]*"))\]/g, "<$1>");
+      }
+    }
+  }
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      const selection = window.getSelection();
+      const range = selection?.getRangeAt(0);
+
+      if (range) {
+        const br = document.createElement("br");
+        range.deleteContents();
+        range.insertNode(br);
+
+        // Set cursor position after the break
+        range.setStartAfter(br);
+        range.collapse(true);
+
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+      }
+    }
+  };
+
+  function handleClick(event: React.MouseEvent<HTMLButtonElement>) {
+    // Get the clicked button
+    const btn = event.currentTarget;
+    const ansiValue = btn.dataset.ansi;
+
+    // Early return if no ansi value
+    if (!ansiValue) {
+      return;
+    }
+
+    // Get the selection from window instead of hook
+    const selection = window.getSelection();
+    if (!selection) {
+      return;
+    }
+
+    // Get selected text
+    const text = selection.toString();
+    if (!text) {
+      return;
+    }
+
+    try {
+      // Create and configure span element
+      const span = document.createElement("span");
+      span.textContent = text;
+      span.classList.add(`ansi-${ansiValue}`);
+
+      // Replace selected content with new span
+      const range = selection.getRangeAt(0);
+      range.deleteContents();
+      range.insertNode(span);
+
+      // Update selection to new span
+      range.selectNodeContents(span);
+      selection.removeAllRanges();
+      selection.addRange(range);
+
+      // Force input event to trigger sanitization
+      const inputEvent = new Event("input", { bubbles: true });
+      textAreaRef.current?.dispatchEvent(inputEvent);
+    } catch (error) {
+      console.error("Failed to apply formatting:", error);
+    }
+  }
+
+  function nodesToANSI(
+    nodes: NodeListOf<ChildNode> | HTMLCollection,
+    states: ANSIState[],
+  ): string {
+    let text = "";
+    for (const node of nodes) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        text += node.textContent;
+        continue;
+      }
+      if (node instanceof HTMLElement) {
+        if (node.nodeName === "BR") {
+          text += "\n";
+          continue;
+        }
+        const ansiCode = +node.className.split("-")[1];
+        const newState = { ...states[states.length - 1] };
+
+        if (ansiCode < 30) newState.st = ansiCode;
+        if (ansiCode >= 30 && ansiCode < 40) newState.fg = ansiCode;
+        if (ansiCode >= 40) newState.bg = ansiCode;
+
+        states.push(newState);
+        text += `\x1b[${newState.st};${ansiCode >= 40 ? newState.bg : newState.fg}m`;
+        text += nodesToANSI(node.childNodes, states);
+        states.pop();
+        text += `\x1b[0m`;
+
+        const currentState = states[states.length - 1];
+        if (currentState.fg !== 2) {
+          text += `\x1b[${currentState.st};${currentState.fg}m`;
+        }
+        if (currentState.bg !== 2) {
+          text += `\x1b[${currentState.st};${currentState.bg}m`;
+        }
+      }
+    }
+    return text;
+  }
 
   const textStyleButtons = [
     { dataAnsi: 0, class: "", text: "Reset" },
@@ -118,10 +281,6 @@ const Content = () => {
     },
   ];
 
-  function handleClick() {
-    console.log(selection?.toString());
-  }
-
   return (
     <div>
       {/* Button Console */}
@@ -133,7 +292,7 @@ const Content = () => {
               key={index}
               data-ansi={style.dataAnsi}
               className={`${style.class}`}
-              onClick={() => handleClick()}
+              onClick={(event) => handleClick(event)}
             >
               {style.text}
             </button>
@@ -148,7 +307,7 @@ const Content = () => {
               <button
                 data-ansi={fgClr.dataAnsi}
                 className={`size-12 rounded-md ${fgClr.class}`}
-                onClick={() => handleClick()}
+                onClick={(event) => handleClick(event)}
               >
                 <span className="hidden">{fgClr.text}</span>
               </button>
@@ -164,7 +323,7 @@ const Content = () => {
               <button
                 data-ansi={bgClr.dataAnsi}
                 className={`size-12 rounded-md ${bgClr.class}`}
-                onClick={() => handleClick()}
+                onClick={(event) => handleClick(event)}
               >
                 <span className="hidden">{bgClr.text}</span>
               </button>
@@ -176,6 +335,8 @@ const Content = () => {
         <div className="flex">
           <div
             ref={textAreaRef}
+            onInput={handleInput}
+            onKeyDown={handleKeyDown}
             contentEditable="true"
             className="h-56 w-2xl rounded-xl border bg-[#383a40] p-4"
           >
@@ -193,12 +354,13 @@ const Content = () => {
           </div>
         </div>
 
-        <Button
-          color={clipboard.copied ? "teal" : "blue"}
-          onClick={() => clipboard.copy("")}
+        <button 
+          ref={copyButtonRef} 
+          onClick={handleCopy}
+          className={isCopied ? 'success' : ''}
         >
-          {clipboard.copied ? "Copied" : "Copy"}
-        </Button>
+          {copyButtonText}
+        </button>
       </div>
     </div>
   );

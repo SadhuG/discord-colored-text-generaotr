@@ -16,7 +16,7 @@ importers:
         version: 7.17.2(react@19.0.0)
       '@tailwindcss/vite':
         specifier: ^4.0.15
-        version: 4.0.15(vite@6.2.3(jiti@2.4.2)(lightningcss@1.29.2)(sugarss@4.0.1(postcss@8.5.3)))
+        version: 4.0.15(vite@6.2.3(@types/node@22.13.13)(jiti@2.4.2)(lightningcss@1.29.2)(sugarss@4.0.1(postcss@8.5.3)))
       react:
         specifier: ^19.0.0
         version: 19.0.0
@@ -30,6 +30,9 @@ importers:
       '@eslint/js':
         specifier: ^9.21.0
         version: 9.23.0
+      '@types/node':
+        specifier: ^22.13.13
+        version: 22.13.13
       '@types/react':
         specifier: ^19.0.10
         version: 19.0.12
@@ -38,7 +41,7 @@ importers:
         version: 19.0.4(@types/react@19.0.12)
       '@vitejs/plugin-react-swc':
         specifier: ^3.8.0
-        version: 3.8.1(vite@6.2.3(jiti@2.4.2)(lightningcss@1.29.2)(sugarss@4.0.1(postcss@8.5.3)))
+        version: 3.8.1(vite@6.2.3(@types/node@22.13.13)(jiti@2.4.2)(lightningcss@1.29.2)(sugarss@4.0.1(postcss@8.5.3)))
       eslint:
         specifier: ^9.21.0
         version: 9.23.0(jiti@2.4.2)
@@ -74,7 +77,7 @@ importers:
         version: 8.28.0(eslint@9.23.0(jiti@2.4.2))(typescript@5.7.3)
       vite:
         specifier: ^6.2.0
-        version: 6.2.3(jiti@2.4.2)(lightningcss@1.29.2)(sugarss@4.0.1(postcss@8.5.3))
+        version: 6.2.3(@types/node@22.13.13)(jiti@2.4.2)(lightningcss@1.29.2)(sugarss@4.0.1(postcss@8.5.3))
 
 packages:
 
@@ -596,6 +599,9 @@ packages:
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
+
+  '@types/node@22.13.13':
+    resolution: {integrity: sha512-ClsL5nMwKaBRwPcCvH8E7+nU4GxHVx1axNvMZTFHMEfNI7oahimt26P5zjVCRrjiIWj6YFXfE1v3dEp94wLcGQ==}
 
   '@types/react-dom@19.0.4':
     resolution: {integrity: sha512-4fSQ8vWFkg+TGhePfUzVmat3eC14TXYSsiiDSLI0dVLsrm9gZFABjPy/Qu6TKgl1tq1Bu1yDsuQgY3A3DOjCcg==}
@@ -1317,6 +1323,9 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
+  undici-types@6.20.0:
+    resolution: {integrity: sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg==}
+
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
 
@@ -1781,19 +1790,23 @@ snapshots:
       '@tailwindcss/oxide-win32-arm64-msvc': 4.0.15
       '@tailwindcss/oxide-win32-x64-msvc': 4.0.15
 
-  '@tailwindcss/vite@4.0.15(vite@6.2.3(jiti@2.4.2)(lightningcss@1.29.2)(sugarss@4.0.1(postcss@8.5.3)))':
+  '@tailwindcss/vite@4.0.15(vite@6.2.3(@types/node@22.13.13)(jiti@2.4.2)(lightningcss@1.29.2)(sugarss@4.0.1(postcss@8.5.3)))':
     dependencies:
       '@tailwindcss/node': 4.0.15
       '@tailwindcss/oxide': 4.0.15
       lightningcss: 1.29.2
       tailwindcss: 4.0.15
-      vite: 6.2.3(jiti@2.4.2)(lightningcss@1.29.2)(sugarss@4.0.1(postcss@8.5.3))
+      vite: 6.2.3(@types/node@22.13.13)(jiti@2.4.2)(lightningcss@1.29.2)(sugarss@4.0.1(postcss@8.5.3))
 
   '@types/estree@1.0.6': {}
 
   '@types/estree@1.0.7': {}
 
   '@types/json-schema@7.0.15': {}
+
+  '@types/node@22.13.13':
+    dependencies:
+      undici-types: 6.20.0
 
   '@types/react-dom@19.0.4(@types/react@19.0.12)':
     dependencies:
@@ -1880,10 +1893,10 @@ snapshots:
       '@typescript-eslint/types': 8.28.0
       eslint-visitor-keys: 4.2.0
 
-  '@vitejs/plugin-react-swc@3.8.1(vite@6.2.3(jiti@2.4.2)(lightningcss@1.29.2)(sugarss@4.0.1(postcss@8.5.3)))':
+  '@vitejs/plugin-react-swc@3.8.1(vite@6.2.3(@types/node@22.13.13)(jiti@2.4.2)(lightningcss@1.29.2)(sugarss@4.0.1(postcss@8.5.3)))':
     dependencies:
       '@swc/core': 1.11.13
-      vite: 6.2.3(jiti@2.4.2)(lightningcss@1.29.2)(sugarss@4.0.1(postcss@8.5.3))
+      vite: 6.2.3(@types/node@22.13.13)(jiti@2.4.2)(lightningcss@1.29.2)(sugarss@4.0.1(postcss@8.5.3))
     transitivePeerDependencies:
       - '@swc/helpers'
 
@@ -2465,6 +2478,8 @@ snapshots:
 
   typescript@5.7.3: {}
 
+  undici-types@6.20.0: {}
+
   uri-js@4.4.1:
     dependencies:
       punycode: 2.3.1
@@ -2505,12 +2520,13 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
-  vite@6.2.3(jiti@2.4.2)(lightningcss@1.29.2)(sugarss@4.0.1(postcss@8.5.3)):
+  vite@6.2.3(@types/node@22.13.13)(jiti@2.4.2)(lightningcss@1.29.2)(sugarss@4.0.1(postcss@8.5.3)):
     dependencies:
       esbuild: 0.25.1
       postcss: 8.5.3
       rollup: 4.37.0
     optionalDependencies:
+      '@types/node': 22.13.13
       fsevents: 2.3.3
       jiti: 2.4.2
       lightningcss: 1.29.2
