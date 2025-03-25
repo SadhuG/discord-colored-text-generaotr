@@ -14,13 +14,15 @@ A web application that allows you to create stylized text with ANSI colors and f
 
 ## How to Use
 
+Live Deployment: [Discord Text Formatter](https://discord-colored-text-generaotr.vercel.app/)
+
 1. Type or paste your text in the editor
 2. Select the text you want to format
 3. Click on any style button to apply formatting:
-   - Use the Reset button to remove formatting
-   - Apply bold or underline
    - Choose text colors
    - Add background colors
+   - Apply bold or underline
+   - Use the Reset button to remove formatting
 4. Mix different styles by selecting text and applying multiple formats
 5. Click "Copy" to copy the formatted text
 6. Paste the copied text in Discord
@@ -44,4 +46,3 @@ A web application that allows you to create stylized text with ANSI colors and f
 ## Acknowledgments
 
 - [rebane's discord-colored-text-generator.](https://gist.github.com/rebane2001/07f2d8e80df053c70a1576d27eabe97c)
-

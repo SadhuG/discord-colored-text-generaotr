@@ -380,8 +380,8 @@ const Content: React.FC<object> = () => {
         <ul className="list-inside list-disc space-y-1">
           <li>Type or paste your text in the editor below</li>
           <li>Select the text you want to format</li>
-          <li>Click on any style button to apply formatting</li>
           <li>Mix different styles, colors, and backgrounds</li>
+          <li>Click on any style button to apply formatting</li>
           <li>Click "Copy" to use in Discord</li>
         </ul>
       </div>
