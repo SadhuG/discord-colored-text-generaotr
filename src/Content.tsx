@@ -88,8 +88,9 @@ const Content: React.FC<object> = () => {
         if (parentSpan && spanIndex !== -1) {
           // Try to find the same span at the same index
           targetNode =
-            (spanIndex !== null && spanIndex !== undefined ? textAreaRef.current.children[spanIndex]?.firstChild : null) ||
-            findEquivalentNode(container, textAreaRef.current);
+            (spanIndex !== null && spanIndex !== undefined
+              ? textAreaRef.current.children[spanIndex]?.firstChild
+              : null) || findEquivalentNode(container, textAreaRef.current);
         } else {
           targetNode = findEquivalentNode(container, textAreaRef.current);
         }
@@ -359,16 +360,43 @@ const Content: React.FC<object> = () => {
   ];
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-900 px-4 py-8 text-white">
+      {/* Header Section */}
+      <header className="mb-8 text-center">
+        <h1 className="mb-2 text-4xl font-bold tracking-tight sm:text-5xl">
+          Discord Text{" "}
+          <span className="animate-text bg-gradient-to-r from-teal-500 via-purple-500 to-orange-500 bg-clip-text text-transparent">
+            Formatter
+          </span>
+        </h1>
+        <p className="text-gray-400">
+          Style your Discord messages with ANSI colors and formatting
+        </p>
+      </header>
+
+      {/* About Section */}
+      <div className="mx-auto mb-8 max-w-2xl rounded-lg bg-gray-800 p-4 text-sm text-gray-300">
+        <h2 className="mb-2 text-lg font-semibold text-white">How to use:</h2>
+        <ul className="list-inside list-disc space-y-1">
+          <li>Type or paste your text in the editor below</li>
+          <li>Select the text you want to format</li>
+          <li>Click on any style button to apply formatting</li>
+          <li>Mix different styles, colors, and backgrounds</li>
+          <li>Click "Copy" to use in Discord</li>
+        </ul>
+      </div>
+
       {/* Button Console */}
-      <div className="mx-auto w-[70%]">
-        {/* text style btns */}
-        <div>
+      <div className="mx-auto w-full max-w-4xl space-y-6">
+        {/* Text style buttons */}
+        <div className="flex flex-wrap gap-2">
           {textStyleButtons.map((style, index) => (
             <button
               key={index}
               data-ansi={style.dataAnsi}
-              className={`${style.class}`}
+              className={`rounded px-4 py-2 font-medium text-white transition-colors ${
+                style.class || "bg-gray-700 hover:bg-gray-600"
+              }`}
               onClick={(event) => handleClick(event)}
             >
               {style.text}
@@ -376,48 +404,59 @@ const Content: React.FC<object> = () => {
           ))}
         </div>
 
-        {/* foreground color btns */}
-        <div>
-          fore ground color btns
-          {foreGroundColorButtons.map((fgClr, index) => (
-            <Tooltip key={index} label={fgClr.toolTipText}>
-              <button
-                data-ansi={fgClr.dataAnsi}
-                className={`size-12 rounded-md ${fgClr.class}`}
-                onClick={(event) => handleClick(event)}
-              >
-                <span className="hidden">{fgClr.text}</span>
-              </button>
-            </Tooltip>
-          ))}
-        </div>
+        {/* Color buttons section */}
+        <div className="space-y-4">
+          {/* Foreground colors */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-gray-400">Text Colors</h3>
+            <div className="flex flex-wrap gap-2">
+              {foreGroundColorButtons.map((fgClr, index) => (
+                <Tooltip key={index} label={fgClr.toolTipText}>
+                  <button
+                    data-ansi={fgClr.dataAnsi}
+                    className={`h-8 w-8 rounded-md transition-transform hover:scale-110 ${fgClr.class}`}
+                    onClick={(event) => handleClick(event)}
+                  >
+                    <span className="sr-only">{fgClr.text}</span>
+                  </button>
+                </Tooltip>
+              ))}
+            </div>
+          </div>
 
-        {/* background color btns */}
-        <div>
-          back ground color btns
-          {backGroundColorButtons.map((bgClr, index) => (
-            <Tooltip key={index} label={bgClr.toolTipText}>
-              <button
-                data-ansi={bgClr.dataAnsi}
-                className={`size-12 rounded-md ${bgClr.class}`}
-                onClick={(event) => handleClick(event)}
-              >
-                <span className="hidden">{bgClr.text}</span>
-              </button>
-            </Tooltip>
-          ))}
+          {/* Background colors */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-gray-400">
+              Background Colors
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {backGroundColorButtons.map((bgClr, index) => (
+                <Tooltip key={index} label={bgClr.toolTipText}>
+                  <button
+                    data-ansi={bgClr.dataAnsi}
+                    className={`h-8 w-8 rounded-md transition-transform hover:scale-110 ${bgClr.class}`}
+                    onClick={(event) => handleClick(event)}
+                  >
+                    <span className="sr-only">{bgClr.text}</span>
+                  </button>
+                </Tooltip>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
-      <div className="mx-auto w-min min-w-1/2">
-        <div className="flex">
+
+      {/* Editor Section */}
+      <div className="mx-auto mt-8 w-full max-w-4xl">
+        <div className="rounded-xl bg-gray-800 p-4">
           <div
             ref={textAreaRef}
             onInput={handleInput}
             onKeyDown={handleKeyDown}
             contentEditable="true"
-            className="h-56 w-2xl rounded-xl border bg-[#383a40] p-4"
+            className="min-h-[200px] w-full rounded-lg border border-gray-700 bg-gray-900 p-4 focus:ring-2 focus:ring-purple-500 focus:outline-none"
           >
-            Welcome to&nbsp;<span className="ansi-33">Rebane</span>'s{" "}
+            Welcome to&nbsp;<span className="ansi-33">Sadhu</span>'s{" "}
             <span className="ansi-45">
               <span className="ansi-37">Discord</span>
             </span>
@@ -434,7 +473,9 @@ const Content: React.FC<object> = () => {
         <button
           ref={copyButtonRef}
           onClick={handleCopy}
-          className={isCopied ? "success" : ""}
+          className={`mt-4 w-full rounded-lg bg-purple-600 px-4 py-2 font-medium text-white transition-colors hover:bg-purple-700 ${
+            isCopied ? "bg-green-600 hover:bg-green-700" : ""
+          }`}
         >
           {copyButtonText}
         </button>
