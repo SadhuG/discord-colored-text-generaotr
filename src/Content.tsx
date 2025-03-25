@@ -7,20 +7,20 @@ interface ANSIState {
   st: number;
 }
 
-
-
-type ButtonState = typeof BUTTON_STATES[keyof typeof BUTTON_STATES];
+type ButtonState = (typeof BUTTON_STATES)[keyof typeof BUTTON_STATES];
 
 const BUTTON_STATES = {
   DEFAULT: "Copy text as Discord formatted",
   COPIED: "Copied!",
-  ERROR: "Failed to copy"
+  ERROR: "Failed to copy",
 } as const;
 
 const Content: React.FC<object> = () => {
   const textAreaRef = useRef<HTMLDivElement>(null);
   const copyButtonRef = useRef<HTMLButtonElement>(null);
-  const [copyButtonText, setCopyButtonText] = useState<ButtonState>(BUTTON_STATES.DEFAULT);
+  const [copyButtonText, setCopyButtonText] = useState<ButtonState>(
+    BUTTON_STATES.DEFAULT,
+  );
   const [isCopied, setIsCopied] = useState(false);
 
   const handleCopy = useCallback(() => {
@@ -48,22 +48,99 @@ const Content: React.FC<object> = () => {
         console.error("Copy failed:", error);
         alert(BUTTON_STATES.ERROR);
       });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array since we're only using refs
 
   function handleInput() {
-    if (textAreaRef.current) {
-      const base = textAreaRef.current.innerHTML.replace(
-        /<(\/?(br|span|span class="ansi-[0-9]*"))>/g,
-        "[$1]",
+    if (!textAreaRef.current) return;
+
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    const container = range.startContainer;
+
+    // Process HTML content
+    const base = textAreaRef.current.innerHTML.replace(
+      /<(\/?(br|span|span class="ansi-[0-9]*"))>/g,
+      "[$1]",
+    );
+
+    if (base.includes("<") || base.includes(">")) {
+      // Store the parent element and its offset for better position tracking
+      const parentSpan = container.parentElement;
+      const spanIndex =
+        parentSpan &&
+        Array.from(textAreaRef.current.children).indexOf(parentSpan);
+
+      textAreaRef.current.innerHTML = base
+        .replace(/<.*?>/g, "")
+        .replace(/[<>]/g, "")
+        .replace(/\[(\/?(br|span|span class="ansi-[0-9]*"))\]/g, "<$1>");
+
+      // Restore selection
+      requestAnimationFrame(() => {
+        if (!selection || !textAreaRef.current) return;
+
+        const newRange = document.createRange();
+        let targetNode: Node | null;
+
+        if (parentSpan && spanIndex !== -1) {
+          // Try to find the same span at the same index
+          targetNode =
+            (spanIndex !== null && spanIndex !== undefined ? textAreaRef.current.children[spanIndex]?.firstChild : null) ||
+            findEquivalentNode(container, textAreaRef.current);
+        } else {
+          targetNode = findEquivalentNode(container, textAreaRef.current);
+        }
+
+        if (targetNode) {
+          // Set cursor to the start of the node
+          newRange.setStart(targetNode, 0);
+          newRange.collapse(true); // Collapse to start
+          selection.removeAllRanges();
+          selection.addRange(newRange);
+        }
+      });
+    }
+  }
+
+  // Helper function to find equivalent node after DOM update
+  function findEquivalentNode(originalNode: Node, newRoot: Node): Node | null {
+    // If the original node is a text node inside a span
+    if (
+      originalNode.nodeType === Node.TEXT_NODE &&
+      originalNode.parentElement
+    ) {
+      const originalParent = originalNode.parentElement;
+      const ansiClass = Array.from(originalParent.classList).find((cls) =>
+        cls.startsWith("ansi-"),
       );
-      if (base.includes("<") || base.includes(">")) {
-        textAreaRef.current.innerHTML = base
-          .replace(/<.*?>/g, "")
-          .replace(/[<>]/g, "")
-          .replace(/\[(\/?(br|span|span class="ansi-[0-9]*"))\]/g, "<$1>");
+
+      if (ansiClass) {
+        // Find all spans with the same ANSI class
+        const spans = (newRoot as Element).querySelectorAll(`.${ansiClass}`);
+
+        // Try to match the text content to find the correct span
+        for (const span of Array.from(spans)) {
+          if (span.textContent === originalParent.textContent) {
+            return span.firstChild || span;
+          }
+        }
+        // Fallback to first matching span if exact match not found
+        return spans[0]?.firstChild || spans[0] || null;
       }
     }
+
+    // If we're directly in the contentEditable div
+    if (
+      originalNode.nodeType === Node.TEXT_NODE &&
+      originalNode.parentElement === textAreaRef.current
+    ) {
+      return newRoot.childNodes[0] || newRoot;
+    }
+
+    return originalNode;
   }
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -354,10 +431,10 @@ const Content: React.FC<object> = () => {
           </div>
         </div>
 
-        <button 
-          ref={copyButtonRef} 
+        <button
+          ref={copyButtonRef}
           onClick={handleCopy}
-          className={isCopied ? 'success' : ''}
+          className={isCopied ? "success" : ""}
         >
           {copyButtonText}
         </button>
