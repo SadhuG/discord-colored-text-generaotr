@@ -14,7 +14,7 @@ A web application that allows you to create stylized text with ANSI colors and f
 
 ## How to Use
 
-Live Deployment: [Discord Text Formatter](https://discord-colored-text-generaotr.vercel.app/)
+Live Deployment: [Discord Text Formatter](https://discord-coloured-text-formatter.vercel.app/)
 
 1. Type or paste your text in the editor
 2. Select the text you want to format
